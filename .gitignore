@@ -1,0 +1,27 @@
+# Eval workspace — not part of the shipped skill
+growth-retrospective-workspace/
+iteration-*/
+
+# Skill-creator artifacts
+.skill
+*.skill
+
+# Local-only state if someone runs the skill against this repo
+state/
+*.local.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~

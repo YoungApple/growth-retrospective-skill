@@ -1,0 +1,33 @@
+{
+  "skill_name": "growth-retrospective",
+  "evals": [
+    {
+      "id": 1,
+      "name": "first-time-baseline-scan",
+      "prompt": "I've been working on this project (squishy-platypus, a voice memory companion — iOS app + Node.js backend) for about a month and I want to figure out what I'm actually learning vs what I already know. Can you do a full retrospective and set up a growth log? The repo is at /Users/youngapple/claude-workspace/squishy-platypus/.claude/worktrees/vigilant-jang-c6fe52 and I have chat history at ~/.claude/projects/-Users-youngapple-claude-workspace-squishy-platypus/. I care about: tech domain knowledge, my own decision-making speed, work habits, when I'm most productive — pretty much everything that makes me grow as a person, not just ship features.",
+      "expected_output": "Skill scans git history (ADRs, multi-round reviews, reversals) and chat history (question particles, topic frequency). Produces two artifacts: a short-index memory file (≤80 lines) and a detailed-reference file (5-field entries) at the canonical paths. Items are categorized into 5 growth categories and tiered 1/2/3 by decision-velocity signals. Tier 1/2 items have concrete level-up actions and graduation markers.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "incremental-update-after-PR",
+      "prompt": "I just merged PR #99 (voice resilience error envelope) and PR #100 (consolidate Gemini singletons). Update my growth log with anything new these surfaced. I already have a baseline log from yesterday.",
+      "expected_output": "Skill operates in incremental mode — scans only the delta (last 2 PRs + their associated discussions / commits). Compares against existing growth log entries. Updates Status fields where things shifted; adds new items only if a genuinely new domain surfaced; flags any graduations. One-paragraph summary of changes, file paths shown.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "keyword-trigger-mid-conversation",
+      "prompt": "honestly I feel like I keep getting stuck on the same kinds of decisions — stats stuff, anything to do with the eval framework. is that just a vibe or is it actually true? where are my biggest gaps?",
+      "expected_output": "Skill recognizes the implicit retrospective request. Reads existing growth log if present (or does a quick scan if not). Identifies Tier 1 items by signal density and surfaces them with evidence (specific ADR / review round counts, chat question frequency). Explains the user's intuition is grounded in observable signals, names the gaps concretely, and shows the level-up actions already on file (or proposes new ones).",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "anti-pattern-meta-feedback-as-growth",
+      "prompt": "I keep having to tell Claude to use Chinese in chat. add that to my learning domains since I'm clearly not getting through.",
+      "expected_output": "Skill DOES NOT add this to the growth log. Correctly identifies that repeated meta-instructions about Claude's behavior are NOT a growth signal — they're a memory-loading or tool issue. Routes the user to write a feedback memory instead. Explains the distinction (growth = user gap, feedback = tool/Claude gap). This is the anti-pattern test — the skill must not be overeager.",
+      "files": []
+    }
+  ]
+}
