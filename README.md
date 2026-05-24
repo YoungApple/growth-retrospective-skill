@@ -1,5 +1,7 @@
 # growth-retrospective
 
+English · [简体中文](README.zh-CN.md)
+
 A cross-agent skill for **personal growth retrospectives** — capturing, organizing, and acting on the gaps a developer reveals while shipping a project. Works in Claude Code, OpenAI Codex CLI, and Google Antigravity (same `SKILL.md` open-standard format, agent-specific storage paths).
 
 > **North-star metric**: increase the user's **decision velocity × decision quality** on each tracked domain over time. Velocity alone is reckless; quality alone is paralysis; together they say *"I make better calls faster than I did three months ago."*
