@@ -6,8 +6,11 @@ description: Capture, organize, and act on a user's personal growth gaps across 
 license: MIT
 homepage: https://github.com/YoungApple/growth-retrospective-skill
 compatibility:
-  agents: [claude-code, codex-cli, antigravity]
+  agents: [claude-code, codex-cli, antigravity, cursor, vscode]
   format: skill-md-open-standard
+  install:
+    global: [claude-code, codex-cli, antigravity]   # symlinked from ~/.{agent}/skills/
+    per-project: [cursor, vscode]                    # cloned into <repo>/.cursor/skills/ etc.
 ---
 
 # Growth Retrospective

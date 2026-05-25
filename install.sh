@@ -120,6 +120,23 @@ link_for_agent "Google Antigravity" "$HOME/.gemini/antigravity/skills"
 # Agent-neutral location (gstack convention)
 link_for_agent "Agent-neutral (~/.agents/skills)" "$HOME/.agents/skills"
 
+# Cursor + VS Code use per-project skill dirs (no global location).
+# If we're being run from inside a git repo, offer to also install there.
+if git rev-parse --show-toplevel >/dev/null 2>&1; then
+  PROJECT_ROOT=$(git rev-parse --show-toplevel)
+  if [ "$PROJECT_ROOT" != "$HOME" ] && [ -n "$PROJECT_ROOT" ]; then
+    say ""
+    say "${BOLD}Per-project agents (Cursor / VS Code)${RESET}"
+    say "${DIM}Detected git repo at: $PROJECT_ROOT${RESET}"
+    say "${DIM}Cursor and VS Code use per-project skill dirs. To install for them, run from inside the target project:${RESET}"
+    say ""
+    say "  ${DIM}cd <your-project>${RESET}"
+    say "  ${DIM}mkdir -p .cursor/skills && ln -s $CANONICAL .cursor/skills/growth-retrospective${RESET}"
+    say "  ${DIM}# (optional) git add .cursor/.gitignore && git commit -m 'add growth-retrospective skill'${RESET}"
+    say ""
+  fi
+fi
+
 # ── summary ──────────────────────────────────────────────────────────────────
 hdr "Installation complete"
 say ""

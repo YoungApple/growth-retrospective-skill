@@ -19,6 +19,15 @@ curl -fsSL https://raw.githubusercontent.com/YoungApple/growth-retrospective-ski
 
 The installer clones to `~/.claude/skills/growth-retrospective/` (canonical) and symlinks into each agent's skill directory it finds. Idempotent — safe to re-run for updates.
 
+**Cursor + VS Code** use per-project skill directories (not global). Run from inside your target project:
+
+```bash
+cd <your-project>
+mkdir -p .cursor/skills && ln -s ~/.claude/skills/growth-retrospective .cursor/skills/growth-retrospective
+```
+
+(The same path works for VS Code with the Skills extension. If you don't have the canonical install yet, run the one-line installer above first.)
+
 **Want to audit before piping curl to bash?** Recommended:
 
 ```bash
