@@ -63,6 +63,8 @@ Full output: [examples/anonymized-worked-example.md](examples/anonymized-worked-
 
 For the detailed side-by-side (cost per retro · storage model · when to install which), see [docs/comparisons.md](docs/comparisons.md).
 
+**Considering other tools in this space?** See [docs/landscape.md](docs/landscape.md) — a fair survey of 15+ adjacent skills across 6 categories (engineering retro, project knowledge, agent memory, knowledge graph, personal growth, skill management) with "best when" guidance. Most readers don't need growth-retrospective — they need /retro or napkin or claude-mem instead. The landscape doc helps you find the right tool for your situation.
+
 The genuinely novel part: **graduation markers**. Every item in Tier 1/2 has an observable, time-bounded condition for leaving the list. *"3 PRs without consulting `/codex` on stats"* beats *"feel confident with stats."* The whole point is items leaving, not items piling up.
 
 ### The "shrinking gap" promise
