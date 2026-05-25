@@ -2,6 +2,9 @@
 growth-retrospective-workspace/
 iteration-*/
 
+# Launch staging — internal drafts, not for public consumption
+.launch/
+
 # Skill-creator artifacts
 .skill
 *.skill

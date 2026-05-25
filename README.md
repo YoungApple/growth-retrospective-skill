@@ -2,9 +2,49 @@
 
 English · [简体中文](README.zh-CN.md)
 
-A cross-agent skill for **personal growth retrospectives** — capturing, organizing, and acting on the gaps a developer reveals while shipping a project. Works in Claude Code, OpenAI Codex CLI, and Google Antigravity (same `SKILL.md` open-standard format, agent-specific storage paths).
+**Most learning logs grow forever. This one is designed to shrink.**
 
-> **North-star metric**: increase the user's **decision velocity × decision quality** on each tracked domain over time. Velocity alone is reckless; quality alone is paralysis; together they say *"I make better calls faster than I did three months ago."*
+A cross-agent skill that turns a solo dev's git history + chat history into a tiered list of *what they're actually learning right now*, with **graduation markers** — concrete conditions for moving an item off the list. Works in Claude Code, OpenAI Codex CLI, and Google Antigravity.
+
+```bash
+# 30-second install (Claude Code; see below for Codex / Antigravity)
+git clone https://github.com/YoungApple/growth-retrospective-skill \
+  ~/.claude/skills/growth-retrospective
+
+# Then in any Claude Code session:
+/retrospective
+```
+
+**One file out**. You read it once and know: what's hard right now, what concrete action would close each gap, and what observable condition would let an item graduate.
+
+### Real example (anonymized)
+
+A 12-day-old solo project, 138 commits, 7 chat sessions, 15 ADRs. After one pass:
+
+- **5 Tier 1/2 items** with explicit graduation markers
+- **2 items demoted to Tier 3** via objective marker (not vibes)
+- **1 cross-category insight** the dev hadn't noticed: stats decisions are slow AND happen at 1am AND late-night decisions reverse more often. Only visible across the 5-category sweep.
+- **Per-incremental cost**: ~$0.30, 5 minutes.
+
+Full output: [examples/anonymized-worked-example.md](examples/anonymized-worked-example.md).
+
+### What's different from other retro / learning-log tools
+
+| Tool | What it does | What it misses |
+|---|---|---|
+| `/retro` (gstack) | Commit cadence + work patterns | No tier system, no graduation markers |
+| `/learn` (gstack) | Project learnings index | No prioritization by challenge level |
+| `claude-mem` | Auto-load memory | Doesn't categorize by 5 growth dimensions |
+| `nessie` | Personal context engine | Doesn't surface what's *still hard* |
+| **growth-retrospective** | **Tiered by decision-velocity signals + graduation markers + 5 dimensions** | **You will have to use it for 3 months to know if it works** |
+
+The genuinely novel part: **graduation markers**. Every item in Tier 1/2 has an observable, time-bounded condition for leaving the list. *"3 PRs without consulting `/codex` on stats"* beats *"feel confident with stats."* The whole point is items leaving, not items piling up.
+
+### The "shrinking gap" promise
+
+The skill bets that **decision velocity × decision quality** is the right north-star for solo-dev growth. Velocity alone is reckless; quality alone is paralysis. Together they say: *"I make better calls faster than I did three months ago."*
+
+You verify this is real by checking, every 3 months: are old gaps actually graduating? Are similar gaps recurring less? The skill ships [a quality eval framework](#how-to-eval-quality) so you can answer "is this working?" with data, not vibes.
 
 ---
 
