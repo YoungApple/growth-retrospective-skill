@@ -82,6 +82,45 @@ A graduated item (Tier 3 → removed from index) is the success state. Items are
 
 Run this sequence whenever invoked. Adapt for incremental (single milestone) vs full (first-time / weekly) modes — see below.
 
+### Step 0: Action audit (the forcing function)
+
+**Before scanning for new gaps, audit what the user committed to last time.** This is the skill's anti-busywork mechanism. A retrospective that doesn't check whether prior commitments produced anything is just noise.
+
+1. Read the current detailed reference (`docs/learning-domains.md` or the path the user picked). Extract every **How to level up** action across all Tier 1 and Tier 2 items. Each action will name a concrete artifact — `STATS-CHEATSHEET.md`, `pnpm gemini:probe`, `docs/entity-erd.md`, a budget alert, a unit test, etc.
+2. For each named artifact, check whether it exists:
+   - Markdown files / docs → `git log --all -- <path>` or `find . -name <basename>`
+   - CLI flags / scripts → `grep -r "<flag>" .` or `find . -name "<script>"`
+   - Tests → check the corresponding test file
+   - Config / alerts → ask the user if the only check is "did you go set this up in the vendor console"
+3. Produce a one-table status report:
+
+   ```
+   Action                                    | Status        | Days since proposed
+   ──────────────────────────────────────────|───────────────|────────────────────
+   Write backend/evals/STATS-CHEATSHEET.md  | ✅ Done       | 14d
+   Add pnpm eval --explain-stats flag       | ❌ Not started | 14d
+   Write pnpm gemini:probe script           | ❌ Not started | 14d
+   Generate docs/entity-erd.md              | 🟡 Partial    | 14d
+   Spec-vs-impl checklist for ADR PRs       | ❌ Not started | 10d
+   ```
+
+4. **Decision rule**:
+   - If **≥1 action completed since last retro** AND <60% pending → proceed to Step 1 (new scan).
+   - If **0 actions completed** AND ≥3 actions pending more than 14 days → **push back**. Do not add new items. Tell the user:
+
+     > "Last retro proposed N actions. M are still untouched after K days. Adding new items now would just grow the list. Three options:
+     >
+     > A) **Commit** — pick one pending action and we mark it active. New scan after that's done.
+     > B) **Deprioritize** — name the actions you're explicitly killing. We update Tier or remove the item.
+     > C) **Override** — explain why a new scan matters more than closing old loops. I'll proceed but flag this in the run log."
+
+5. If user picks A or B in step 4, update the detailed reference and stop. The retro **completed without a new scan** — that's correct behavior. The forcing function did its job.
+6. If user picks C, proceed to Step 1 but write the override reason into the new retro under a `## Override notes` section.
+
+**Why this exists.** The biggest stickiness defect found in persona review: users who run `/retrospective` twice see nearly-identical output because no level-up action was completed between runs — which makes the skill feel like busywork. This step turns the skill from "another retro tool" into "an accountability loop where new items don't appear until old ones close or get killed."
+
+**Cost**: ~30 seconds for the file checks. The push-back path takes 1 turn of the user's time. The completed-actions path is free.
+
 ### Step 1: Scan signal sources
 
 Run the scripts in `scripts/`:
