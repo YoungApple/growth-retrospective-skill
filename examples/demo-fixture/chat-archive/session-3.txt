@@ -1,0 +1,12 @@
+USER: late night again
+USER: 02:30 still debugging the watchdog
+USER: this is the 3rd late-night session this week
+USER: I notice I make worse decisions late
+USER: that voice resilience proposal I rejected — looking back it was right
+USER: should probably go to sleep instead of pushing
+USER: ok last thing then bed
+USER: silence_watchdog ErrorKind — ADR draft
+USER: 这个 ADR 写完明天 review 再 merge
+USER: morning rule: late-night decisions need next-day review
+USER: let me write that down as a principle
+USER: principle: late-night reversals are 3x higher rate, schedule code-review for next morning

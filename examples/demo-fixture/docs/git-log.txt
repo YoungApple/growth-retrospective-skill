@@ -1,0 +1,42 @@
+7a3b9f1 docs: ADR-0005 reverse decision on caching layer (supersedes ADR-0003)
+2e8c4a0 [stats] code-review fixes (max-effort pass) — 3 findings
+b1d6f5e [stats] PR-C: McNemar paired test for eval delta
+9c2a8d4 [stats] PR-B: Wilson confidence interval on small samples
+4f7e1c2 [stats] PR-A: multi-seed evaluation harness
+8a5b3d9 feat: error envelope schema + iOS toast wiring
+1c4e6f8 fix(memory): contacts grounding for Person extraction
+e3b9d2a refactor: code-review fixes (max-effort pass) — 7 issues
+5f8c1a3 ci: smoke tests for daily eval canary
+b7d4e2f docs: eval-mechanism-review-round-3 (final)
+4a9c3e1 docs: eval-mechanism-review-round-2
+2d8f5b7 chore: ADR-0004 — silent_watchdog ErrorKind for stall surfacing
+6c1a4e9 release: v0.3.1 — patch for emoji rendering on Talk tab
+9b2d7f3 feat(voice): silence watchdog 3.5s, configurable via env
+3e6c8a1 fix(stats): Wilson CI calculation off-by-one
+7f4b9c2 chore: bump deps + lockfile
+1d8e5a4 docs: principles.md draft (defer review)
+4c2f6d8 feat(memory): per-session meeting-notes column (ADR-0007)
+e9b3d1c [memory] PR-D: 9-type entity taxonomy
+2a8f4e7 fix: regression in dataset-baseline-v1 promotion (#42 reopened)
+5b6c9d3 [memory] PR-C: HITL preference correction
+c1e4f8a [memory] PR-B: contacts grounding behind feature flag
+8d3a5b9 [memory] PR-A: entity-type ADR landed
+6f2c7e4 ci: eval canary 6h cron
+3a9d4b8 docs: memory-research-2026-05-v2.md (supersedes -v1)
+1e7c5a2 docs: memory-research-2026-05.md
+9b4d8f3 chore: typecheck strictness raised
+4c8a2e6 fix(perf): N+1 query in dashboard load
+7e3b5c1 release: v0.3.0 — Talk tab + Memory MVP
+2f9d6a4 ci: pre-commit hook for prompt diff alert
+6a1e3c7 feat: prompt versioning + version-id FK
+b8c5f2d docs: ADR-0003 — caching layer (later reversed by ADR-0005)
+e4d7a3b chore: README expansion
+1c9f5b6 fix: trust-gradient PCDL override flow
+5d2e8c4 feat: settings panel skeleton
+8a3f1d7 chore: lint cleanup
+3b7e6c2 release: v0.2.0
+6f4a9d8 ci: shellcheck on scripts/
+1e5c8b3 docs: contributing guide
+9d2a4f7 fix: agent-friendly issue labels
+4e6b1c8 chore: gitignore tweaks
+7c3d5a9 feat: initial commit (v0.1.0)

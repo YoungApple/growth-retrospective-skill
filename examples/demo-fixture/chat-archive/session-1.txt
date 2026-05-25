@@ -1,0 +1,17 @@
+USER: morning, what's the plan today
+USER: ok let me start with stats stuff
+USER: wait what's a Wilson CI again? is that different from normal?
+USER: 啥意思 — Wilson 跟正态近似有什么区别
+USER: oh ok so it's tighter at small n
+USER: 也就是说 Wilson 在 n=42 上更准对吧
+USER: let me try McNemar real quick
+USER: hmm what's the right form — with or without continuity correction?
+USER: 这个我之前问过吗
+USER: yeah this is the third time I'm asking about this
+USER: let me write it down somewhere
+USER: ok moving on to the entity taxonomy debate
+USER: I want to wrap memory-research-2026-05 today
+USER: but I keep getting stuck on whether to merge Place + Event
+USER: "Mountain View for Google IO" — that's one thing or two?
+USER: ok going with 9 types separated
+USER: let me write the ADR

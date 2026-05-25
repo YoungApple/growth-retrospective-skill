@@ -1,0 +1,14 @@
+USER: the cache layer is killing me
+USER: 8% hit rate is not worth 200 lines of invalidation logic
+USER: 2 incidents in 5 days from stale cache
+USER: I think we need to rip it out
+USER: yeah let me write ADR-0005 to supersede ADR-0003
+USER: this is the second decision reversal this month
+USER: 反正这种 5-day reversal 信号最强
+USER: ok done, PR #24 removes the cache
+USER: now back to the stats stuff
+USER: ugh I keep forgetting Wilson vs Clopper-Pearson
+USER: what's the difference again
+USER: 算了直接用 Wilson
+USER: tighter CI at small n, good enough
+USER: 决定了不再反复想这个

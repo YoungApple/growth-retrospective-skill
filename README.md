@@ -20,6 +20,15 @@ git clone https://github.com/YoungApple/growth-retrospective-skill \
 /retrospective
 ```
 
+**Want to see what the skill produces before installing?** Run the demo fixture (5 seconds, no LLM, no install):
+
+```bash
+git clone https://github.com/YoungApple/growth-retrospective-skill /tmp/grs && \
+  bash /tmp/grs/examples/demo-fixture/demo.sh
+```
+
+Shows the Step 0 Action Audit + signal extraction on a synthetic 14-day project. See `examples/demo-fixture/` for what's in the fixture.
+
 **One file out**. You read it once and know: what's hard right now, what concrete action would close each gap, and what observable condition would let an item graduate.
 
 ### Real example (anonymized)
