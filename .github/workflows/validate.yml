@@ -1,0 +1,82 @@
+name: Validate skill structure
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  structure:
+    name: Skill structure + scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate SKILL.md frontmatter
+        run: |
+          set -euo pipefail
+          if ! head -1 SKILL.md | grep -q '^---$'; then
+            echo "❌ SKILL.md missing opening frontmatter marker"
+            exit 1
+          fi
+          if ! grep -E '^name:' SKILL.md | head -1 | grep -q 'growth-retrospective'; then
+            echo "❌ SKILL.md frontmatter name field missing or wrong"
+            exit 1
+          fi
+          if ! grep -E '^description:' SKILL.md | head -1 | grep -q .; then
+            echo "❌ SKILL.md frontmatter description missing"
+            exit 1
+          fi
+          echo "✅ SKILL.md frontmatter valid"
+
+      - name: Validate required files exist
+        run: |
+          set -euo pipefail
+          for f in README.md SKILL.md LICENSE CONTRIBUTING.md FAQ.md \
+                   EVAL-FRAMEWORK.md \
+                   references/signal_taxonomy.md \
+                   references/growth_categories.md \
+                   references/learning_journey.md \
+                   references/examples.md \
+                   assets/templates/short_index.md \
+                   assets/templates/detailed_reference.md \
+                   scripts/scan_git_signals.sh \
+                   scripts/scan_chat_signals.py \
+                   evals/evals.json; do
+            if [ ! -f "$f" ]; then
+              echo "❌ Required file missing: $f"
+              exit 1
+            fi
+          done
+          echo "✅ All required files present"
+
+      - name: ShellCheck scan_git_signals.sh
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: ./scripts
+          severity: warning
+
+      - name: Validate Python script syntax
+        run: |
+          python3 -m py_compile scripts/scan_chat_signals.py
+          echo "✅ scan_chat_signals.py syntax OK"
+
+      - name: Smoke test scan_chat_signals.py argparse
+        run: |
+          python3 scripts/scan_chat_signals.py --help > /dev/null
+          echo "✅ scan_chat_signals.py --help works"
+
+      - name: Validate evals.json
+        run: |
+          python3 -c "import json; data = json.load(open('evals/evals.json')); assert data['skill_name'] == 'growth-retrospective'; assert len(data['evals']) >= 3, 'need at least 3 evals'"
+          echo "✅ evals.json structure valid"
+
+      - name: Check SKILL.md line count budget
+        run: |
+          LINES=$(wc -l < SKILL.md)
+          if [ "$LINES" -gt 350 ]; then
+            echo "⚠️ SKILL.md is $LINES lines (budget is ≤350). Consider moving content to references/."
+            exit 1
+          fi
+          echo "✅ SKILL.md is $LINES lines (under 350-line budget)"

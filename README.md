@@ -2,6 +2,11 @@
 
 English · [简体中文](README.zh-CN.md)
 
+[![Validate](https://github.com/YoungApple/growth-retrospective-skill/actions/workflows/validate.yml/badge.svg)](https://github.com/YoungApple/growth-retrospective-skill/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/YoungApple/growth-retrospective-skill)](https://github.com/YoungApple/growth-retrospective-skill/releases)
+[![License](https://img.shields.io/github/license/YoungApple/growth-retrospective-skill)](LICENSE)
+[![Star History Chart](https://api.star-history.com/svg?repos=YoungApple/growth-retrospective-skill&type=Date)](https://star-history.com/#YoungApple/growth-retrospective-skill&Date)
+
 **Most learning logs grow forever. This one is designed to shrink.**
 
 A cross-agent skill that turns a solo dev's git history + chat history into a tiered list of *what they're actually learning right now*, with **graduation markers** — concrete conditions for moving an item off the list. Works in Claude Code, OpenAI Codex CLI, and Google Antigravity.
