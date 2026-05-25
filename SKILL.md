@@ -1,6 +1,10 @@
 ---
 name: growth-retrospective
+identifier: youngapple-growth-retrospective
+version: 0.2.0
 description: Capture, organize, and act on a user's personal growth gaps across a project — domain knowledge, human skills, work habits, meta-cognition, and productivity patterns. Maintains a two-layer storage (short index in agent memory + detailed reference in repo docs) ranked by decision-velocity signals. Generates concrete learning journeys with graduation markers. Use this skill whenever the user asks "what do I need to learn", "review my growth", "reflect on the project", "where am I weak", "retrospective", "what are my gaps", "am I improving", or runs `/retrospective` / `/reflect` / `/growth-review`. Also use proactively at the end of long sessions (≥30 turns of substantive work) or after major milestones (PR merged, ADR landed, sprint closed) — the goal is that the same gap should not be re-discovered next quarter. Decision velocity AND decision quality are the north-star metrics. Cross-agent compatible — works in Claude Code, Codex CLI, and Google Antigravity (same SKILL.md format, agent-specific storage paths).
+license: MIT
+homepage: https://github.com/YoungApple/growth-retrospective-skill
 compatibility:
   agents: [claude-code, codex-cli, antigravity]
   format: skill-md-open-standard
