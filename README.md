@@ -38,6 +38,8 @@ Full output: [examples/anonymized-worked-example.md](examples/anonymized-worked-
 | `nessie` | Personal context engine | Doesn't surface what's *still hard* |
 | **growth-retrospective** | **Tiered by decision-velocity signals + graduation markers + 5 dimensions** | **You will have to use it for 3 months to know if it works** |
 
+For the detailed side-by-side (cost per retro · storage model · when to install which), see [docs/comparisons.md](docs/comparisons.md).
+
 The genuinely novel part: **graduation markers**. Every item in Tier 1/2 has an observable, time-bounded condition for leaving the list. *"3 PRs without consulting `/codex` on stats"* beats *"feel confident with stats."* The whole point is items leaving, not items piling up.
 
 ### The "shrinking gap" promise
