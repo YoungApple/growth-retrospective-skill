@@ -11,23 +11,32 @@ English · [简体中文](README.zh-CN.md)
 
 A cross-agent skill that turns a solo dev's git history + chat history into a tiered list of *what they're actually learning right now*, with **graduation markers** — concrete conditions for moving an item off the list. Works in Claude Code, OpenAI Codex CLI, and Google Antigravity.
 
-```bash
-# 30-second install (Claude Code; see below for Codex / Antigravity)
-git clone https://github.com/YoungApple/growth-retrospective-skill \
-  ~/.claude/skills/growth-retrospective
+### One-line install (Claude Code + Codex CLI + Antigravity, auto-detected)
 
-# Then in any Claude Code session:
-/retrospective
+```bash
+curl -fsSL https://raw.githubusercontent.com/YoungApple/growth-retrospective-skill/main/install.sh | bash
 ```
 
-**Want to see what the skill produces before installing?** Run the demo fixture (5 seconds, no LLM, no install):
+The installer clones to `~/.claude/skills/growth-retrospective/` (canonical) and symlinks into each agent's skill directory it finds. Idempotent — safe to re-run for updates.
+
+**Want to audit before piping curl to bash?** Recommended:
+
+```bash
+git clone https://github.com/YoungApple/growth-retrospective-skill /tmp/grs
+cat /tmp/grs/install.sh   # audit
+bash /tmp/grs/install.sh
+```
+
+Then in any session: `/retrospective` (or keyword: *"what are my gaps", "review my growth", "am I improving"*).
+
+**Want to see output before installing at all?** Run the demo (5 seconds, no LLM, no install):
 
 ```bash
 git clone https://github.com/YoungApple/growth-retrospective-skill /tmp/grs && \
   bash /tmp/grs/examples/demo-fixture/demo.sh
 ```
 
-Shows the Step 0 Action Audit + signal extraction on a synthetic 14-day project. See `examples/demo-fixture/` for what's in the fixture.
+Shows the Step 0 Action Audit + signal extraction on a synthetic 14-day project.
 
 **One file out**. You read it once and know: what's hard right now, what concrete action would close each gap, and what observable condition would let an item graduate.
 

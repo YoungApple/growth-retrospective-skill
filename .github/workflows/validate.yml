@@ -51,10 +51,11 @@ jobs:
           done
           echo "✅ All required files present"
 
-      - name: ShellCheck scan_git_signals.sh
+      - name: ShellCheck scripts + install.sh
         uses: ludeeus/action-shellcheck@master
         with:
-          scandir: ./scripts
+          scandir: .
+          ignore_paths: examples/demo-fixture
           severity: warning
 
       - name: Validate Python script syntax
