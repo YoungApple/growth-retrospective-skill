@@ -304,6 +304,13 @@ Things the skill explicitly avoids:
 
 ---
 
+## Standalone references (Gists you can read without installing)
+
+These extract pieces of the skill that are useful even if you don't use the skill itself:
+
+- [**Decision-velocity signals — a taxonomy**](https://gist.github.com/YoungApple/6e78359aa86b9d47f9c39ed54d7b92e4) — strong / medium / weak / anti-signals for grounding tier assignment in observable artifacts (not self-reports). For solo devs who want the thinking tool without the skill.
+- [**Anti-busywork forcing function — a design pattern**](https://gist.github.com/YoungApple/cdb12fc27dbd3ff0c35c93fff3b5986f) — the 4-step mechanism for retro/log/tracking tools that prevents item pile-up. For tool builders considering a similar gate in their own tools.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
