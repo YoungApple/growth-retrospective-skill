@@ -1,259 +1,269 @@
 ---
 name: growth-retrospective
 identifier: youngapple-growth-retrospective
-version: 0.2.0
-description: Capture, organize, and act on a user's personal growth gaps across a project — domain knowledge, human skills, work habits, meta-cognition, and productivity patterns. Maintains a two-layer storage (short index in agent memory + detailed reference in repo docs) ranked by decision-velocity signals. Generates concrete learning journeys with graduation markers. Use this skill whenever the user asks "what do I need to learn", "review my growth", "reflect on the project", "where am I weak", "retrospective", "what are my gaps", "am I improving", or runs `/retrospective` / `/reflect` / `/growth-review`. Also use proactively at the end of long sessions (≥30 turns of substantive work) or after major milestones (PR merged, ADR landed, sprint closed) — the goal is that the same gap should not be re-discovered next quarter. Decision velocity AND decision quality are the north-star metrics. Cross-agent compatible — works in Claude Code, Codex CLI, and Google Antigravity (same SKILL.md format, agent-specific storage paths).
+version: 0.3.0
+description: Personal growth gap retrospective. 5-category sweep ranked by decision-velocity signals; each top gap launched with a Deep Research / NotebookLM prompt + 4 multiple-choice questions grounded in your own codebase (your files + ADRs are the ground truth, not the AI's knowledge). Step 0 Action Audit refuses new items if prior level-up actions are stuck — designed so items leave the list. Use when slash commands `/retrospective`, `/reflect`, `/growth-review`, or keywords like "what should I learn", "where am I weak", "am I improving", "review my growth". Also proactive after long sessions (≥30 substantive turns) or milestones (PR merged, ADR landed, sprint closed). Cross-agent compatible — Claude Code, Codex CLI, Antigravity, Cursor, VS Code, same SKILL.md format, agent-specific storage paths.
 license: MIT
 homepage: https://github.com/YoungApple/growth-retrospective-skill
 compatibility:
   agents: [claude-code, codex-cli, antigravity, cursor, vscode]
   format: skill-md-open-standard
   install:
-    global: [claude-code, codex-cli, antigravity]   # symlinked from ~/.{agent}/skills/
-    per-project: [cursor, vscode]                    # cloned into <repo>/.cursor/skills/ etc.
+    global: [claude-code, codex-cli, antigravity]
+    per-project: [cursor, vscode]
 ---
 
 # Growth Retrospective
 
-## Why this skill exists
+A retrospective skill designed so items leave the list. Captures personal growth
+gaps across 5 categories, ranks by decision-velocity signals, and **launches**
+learning — not just lists it.
 
-The user is building a real project and wants to grow as a person, not just ship features. Every project leaves a trail of evidence — slow decisions, multi-round reviews, repeated chat questions, reversed ADRs, recurring bugs — about where the user is stretching versus operating from expertise. Without a deliberate practice of capturing and surfacing those gaps, the same struggles recur on the next project.
-
-This skill operates the loop: **capture signals → categorize → prioritize → produce learning journeys → measure if gaps shrink over time**. The north-star metric is the user's **decision velocity × decision quality** on each tracked domain. Velocity alone is reckless; quality alone is paralysis; together they say "I make better calls faster than I did three months ago."
+North star: **decision velocity × decision quality** trending up over months.
+A log that only grows is failure mode.
 
 ## When to invoke
 
-Five trigger pathways. The skill works the same in all five — only the entry context differs.
+- Slash commands: `/retrospective`, `/reflect`, `/growth-review`
+- Keywords (any language): "what should I learn", "where am I weak", "review my
+  growth", "am I improving", "我的 gap 在哪", "需要学什么"
+- Proactive: after ≥30 substantive turns in a session, or after PR merged / ADR
+  landed / sprint close. Ask once at a natural stopping point; never interrupt
+  mid-task.
+- First-time setup: full baseline scan across the whole repo + chat history.
 
-1. **Explicit slash commands**: `/retrospective`, `/reflect`, `/growth-review`. User wants a deliberate sit-down.
-2. **Keyword detection in chat**: phrases like "what do I need to learn", "am I improving", "where am I weak", "reflect on this project", "review my growth", "我需要学什么", "我做得怎么样", "我的 gap 在哪". Treat as if the user typed `/retrospective`.
-3. **Session-end proactive**: at the end of a session with ≥30 substantive turns (real work, not just chat), offer: "want me to capture what we learned for the growth log?" Do not interrupt mid-task; ask once at natural stopping points.
-4. **Milestone hooks**: after PR merge, ADR landed, sprint closed, or release shipped, the skill can be invoked to scan the delta and update the growth log incrementally. Recommended cadence: weekly minimum.
-5. **First-time setup**: when the user has no existing growth log for a project, do a one-time baseline scan across the whole repo + chat history.
+If multiple triggers fire together, run ONCE — never double up.
 
-If multiple triggers fire close together (e.g. session-end immediately after a milestone), do ONE retrospective covering both — never run two passes back-to-back.
+## Core loop — 5 phases
 
-## What "growth" covers — five categories
+| # | Phase | What |
+|---|---|---|
+| 0 | **AUDIT** | Did prior level-up actions actually ship? Filesystem check before adding new gaps. |
+| 1 | **SWEEP** | Visit all 5 categories explicitly. Missing one is a defect, even if empty. |
+| 2 | **RANK** | Tier each gap by decision-velocity signals. |
+| 3 | **ANCHOR** | Ground each top gap to a real `file:line` / ADR / commit in the user's repo. |
+| 4 | **LAUNCH** | Per top gap: research prompt + anchored MCQ. |
 
-Capture across all five. Most users default to category 1 only; this skill is unusual in tracking all five together because they compound.
+All 5 phases are mandatory. Skipping AUDIT turns the log into a hoarder list.
+Skipping SWEEP biases toward domain knowledge. Skipping ANCHOR weakens
+verification. Skipping LAUNCH leaves gaps decorating the log forever.
 
-1. **Domain knowledge** — technical / scientific concepts the user is learning while building (e.g. eval statistics, LiveKit data channels, multi-tenant API quotas). Most visible in ADRs and PR review rounds.
-2. **Human skills** — judgment, abstraction, decision-making, communication clarity, asking precise questions. Less visible per-PR; visible in chat patterns over weeks.
-3. **Work habits** — ADR discipline, PR review cadence, commit hygiene, documentation follow-through, when to ask for help vs push through. Visible in git history.
-4. **Meta-cognition** — how the user learns ("I learn fastest by writing a one-page cheatsheet"), when decisions feel slow vs fast, what kinds of problems they avoid. Visible in patterns across multiple domains.
-5. **Productivity / focus / energy patterns** — when in the day is the user most productive? What workflows keep them in flow? When do they context-switch and lose hours? Visible in commit timestamps + session lengths + interruption signals in chat.
+---
 
-Categories 4 and 5 are the ones humans most often skip because they're harder to instrument. The scripts in `scripts/` help.
+## Phase 0: AUDIT — the forcing function (anti-busywork)
 
-## The two-layer storage
+Before adding ANY new gap, read the prior detailed reference and check:
 
-This is the canonical pattern. Every project gets:
+1. List every prior `How to level up` action across all Tier 1 + Tier 2 items.
+2. For each, check the filesystem: does the named artifact exist? (cheatsheet,
+   script, diagram, test, alert, ADR entry)
+3. Decision rule:
+   - **0 completed AND ≥3 pending >14 days** → REFUSE to add new items. Offer:
+     - A) Commit to one pending action (mark it active, no new scan)
+     - B) Explicitly drop pending actions (note in detailed ref, no new scan)
+     - C) Override with a documented reason (new scan proceeds; reason logged)
+   - **Anything else** → proceed.
 
-- **Short index** — loaded into every chat session by the host agent. One bullet per tracked item: name, current tier, one-line status. Keep under ~80 lines / 4 KB.
-- **Detailed reference** at `<repo>/docs/learning-domains.md` (or another canonical path the user picks) — grep'd on demand. Five fields per item: **Signal · Concepts in play · Status · How to level up · Graduation marker**.
+The refusal path is the feature. The skill's value lies in saying "no more new
+items until you close the old ones."
 
-Both layers MUST stay in sync. When you add a new item, add to both. When an item graduates (meets its graduation marker), simplify or remove from the index but keep in the detailed reference for posterity.
+---
 
-### Where the short index lives — pick by host agent
+## Phase 1: SWEEP — visit all 5 categories explicitly
 
-The detailed reference is repo content (same path everywhere). The short index is **agent-state** — different agents auto-load from different paths. Detect which agent is running this skill and write to the matching path:
+| # | Category | Visible in |
+|---|---|---|
+| 1 | Domain knowledge | ADRs, PR review rounds, repeated concept lookups |
+| 2 | Human skills | Chat patterns over weeks (negotiation, written precision, asking) |
+| 3 | Work habits | Git history (ADR discipline, doc follow-through, commit hygiene) |
+| 4 | Meta-cognition | Cross-domain patterns (how you decide, when you ask vs push) |
+| 5 | Productivity / focus | Commit timestamps, session lengths, interruption signals |
 
-| Host agent | Short index path |
+Most users default to (1). The compounding lives in (4) and (5).
+
+**Accelerants** (optional, fall back to manual `git log` / session-jsonl reading
+if scripts can't run):
+
+- `bash scripts/scan_git_signals.sh <repo> [days]`
+- `python3 scripts/scan_chat_signals.py --project-id=<ID> --topics=<csv>`
+  (Note: `--project-id=` requires the `=` form — IDs start with `-` and argparse
+  mis-parses positional `-` strings as flags.)
+
+---
+
+## Phase 2: RANK — tier each gap by signals
+
+See `references/signal_taxonomy.md` for the full taxonomy.
+
+- **Tier 1 — actively slowing decisions.** Strong signals: ≥3 review rounds on
+  same topic, reversed ADRs, evidence-falsified challenges, repeated "what does
+  X mean" in same week.
+- **Tier 2 — knowledge gap, not yet blocking.** Medium signals: ADR landed after
+  challenge, decided-but-not-automatic, looked up rather than recalled.
+- **Tier 3 — settled.** Decisions stick. Demote here when the graduation marker
+  is met. Graduating off the list is the success state.
+
+**Mandatory demotion check:** every pass, walk all Tier 1 + Tier 2 items and
+ask whether the graduation marker has quietly been met. Demote if yes. Items
+don't graduate on their own.
+
+---
+
+## Phase 3: ANCHOR — ground each top gap to user's real artifacts
+
+For each Tier 1 + Tier 2 gap (max 3 surfaced per retro):
+
+1. Grep the user's repo for related symbols, error messages, ADR references.
+2. Find a concrete `<file>:<line>` / `ADR-N` / `<commit-sha>` the user can open
+   in under 2 minutes.
+3. If no anchor found in ≤2 min of searching, mark the gap **abstract** and
+   warn — Phase 4 MCQ will be weaker.
+
+Anchoring is what makes the next phase work. AI-native skills can read the user's
+code; traditional learning apps can't. This is the unique leverage point.
+
+---
+
+## Phase 4: LAUNCH — emit a learning launchpad per top gap
+
+For each top gap (max 3), produce TWO artifacts:
+
+### (a) Research prompt (copy-paste to Deep Research / NotebookLM / ChatGPT)
+
+```
+I'm building [project, 1 line]. I need to understand [gap concept] in the
+context of [anchor — <file>:<line> or ADR-N].
+
+Questions:
+1. When does this matter in practice?
+2. What are the failure modes I should worry about?
+3. Real-world examples in [user's stack]?
+4. Common misconceptions?
+
+Output: deep-dive report with citations to primary sources (docs, RFCs, post-mortems).
+```
+
+The prompt is portable. The user picks the external tool. The skill doesn't bind
+to one vendor.
+
+### (b) Anchored MCQ (4 questions, 2-3 min total)
+
+Generate 4 multiple-choice questions verifying the user learned the concept.
+**Ground truth comes from the user's own artifacts, not the AI's knowledge** —
+this is the defense against AI-hallucinated answers.
+
+Use a mix of question forms:
+
+| Form | Example | Ground truth |
+|---|---|---|
+| **State** | "Your `<file>:<line>` uses isolation level X. Which?" | `grep` the file |
+| **Consequence** | "If ADR-N's choice were reversed, what breaks first?" | ADR-N body |
+| **Compare** | "Run A vs Run B — which is more likely to regress on category X?" | Eval output |
+| **Predict-then-reveal** | "Before I show you ADR-M's actual rationale, predict: (a)(b)(c)(d)" | ADR-M body |
+
+The predict-then-reveal form is highest-retention (prediction-error feedback in
+learning science). Use it for ≥1 of the 4 questions when a relevant ADR or commit
+rationale exists.
+
+**Constraints**:
+- Each question ≤30 sec to answer.
+- 4 questions = 2-3 min total.
+- Answer key MUST cite the ground-truth artifact: `Correct: (b). See <file>:<line>`.
+- Skip MCQ for **taste gaps** (design opinion, product judgment). Use
+  Explain-back instead: "Describe in 5 sentences why X over Y."
+- Skip MCQ for **muscle memory** (vim, shell fluency). Verification mechanism
+  doesn't solve those — only practice does.
+
+The skill's job is to make starting trivially easy. Whether the user follows
+through is their choice.
+
+---
+
+## Storage — two layers, both mandatory
+
+| Layer | Path (Claude Code) | Lifecycle |
+|---|---|---|
+| **Short index** | `~/.claude/projects/<project-id>/memory/learning_domains.md` | Auto-loaded each session; ≤80 lines / 4 KB; one bullet per active item |
+| **Detailed ref** | `<repo>/docs/learning-domains.md` | Grep'd on demand; 5 fields per item: `Signal · Concepts · Status · How-to-level-up · Graduation marker` |
+
+Cross-agent short-index paths (write to whichever the host agent auto-loads):
+
+| Host | Short-index path |
 |---|---|
-| **Claude Code** | `~/.claude/projects/<project-id>/memory/learning_domains.md` — auto-loads in every chat. Project ID encodes the absolute path (slashes → dashes), e.g. `-Users-foo-work-myproject`. |
-| **Codex CLI** | `~/.codex/skills/growth-retrospective/state/<project-slug>/learning_domains.md` OR append a `## Learning domains` section to the repo's `AGENTS.md`. AGENTS.md is read at session start, so appending there gives the same auto-load behavior. |
-| **Antigravity** | `~/.gemini/antigravity/skills/growth-retrospective/state/<project-slug>/learning_domains.md` OR append to the repo's `.agents/agents.md`. Same logic as Codex — agents.md is read at session start. |
-| **Unknown / generic agent** | `<repo>/.growth-log/short-index.md` — loses auto-load but stays grep-able. |
+| Claude Code | `~/.claude/projects/<id>/memory/learning_domains.md` |
+| Codex CLI | Append `## Learning domains` section to repo's `AGENTS.md` |
+| Antigravity | Append to repo's `.agents/agents.md` |
+| Unknown | `<repo>/.growth-log/short-index.md` |
 
-Project-slug is a short, filesystem-safe name for the project (e.g. `squishy-platypus`). Generate from the repo's directory name if the user hasn't picked one.
+The detailed reference is repo content (same path everywhere); the short index
+is agent-state.
 
-The skill itself lives at one canonical location with symlinks for each agent:
-- Canonical: `~/.claude/skills/growth-retrospective/`
-- Symlinks: `~/.agents/skills/growth-retrospective`, `~/.codex/skills/growth-retrospective`, `~/.gemini/antigravity/skills/growth-retrospective` (all point to canonical)
+**Both layers MUST stay in sync.** Adding to one only is a defect. When an item
+graduates, simplify in detailed ref + remove from index.
 
-This means edits to the skill body propagate to all three agents automatically.
+Templates: `assets/templates/short_index.md`, `assets/templates/detailed_reference.md`.
 
-See `assets/templates/short_index.md` and `assets/templates/detailed_reference.md` for the exact format. See `references/examples.md` for a real worked example from the `squishy-platypus` project (Claude Code-based).
+---
 
-## Tiers — how to rank what the user is learning
+## Output to the user (chat reply)
 
-Three tiers, based on **decision velocity signals** (see `references/signal_taxonomy.md` for the full taxonomy).
+After running, the user sees ONLY:
 
-- **Tier 1 — high challenge.** Decisions are slow: 3+ review rounds, reversed ADRs, multi-version research docs, evidence-falsified challenges, repeated `啥意思?` / `what does X mean` in chat on the same concept.
-- **Tier 2 — medium challenge.** A decision was made but tested by reality: ADR landed after challenge, incident-driven design, decision held under pressure but not yet automatic.
-- **Tier 3 — settled.** Decisions stick. The user is applying knowledge, not learning it. Demote items here when they meet their graduation marker.
+1. **Phase 0 verdict** — if AUDIT refused, show this FIRST and stop.
+2. One-paragraph summary: graduations / new items / stuck items.
+3. File paths: short index + detailed ref.
+4. Top 1-3 launchpads (research prompt + MCQ block) — inline, ready to copy-paste.
 
-A graduated item (Tier 3 → removed from index) is the success state. Items are NOT supposed to live in Tier 1 forever — the level-up actions should move them toward graduation.
+Do NOT dump the full updated detailed reference. It's a file; the user opens it.
 
-## The capture process
+### Communication discipline (HARD)
 
-Run this sequence whenever invoked. Adapt for incremental (single milestone) vs full (first-time / weekly) modes — see below.
+Before sending the chat reply, scan `~/.claude/projects/<id>/memory/` for files
+matching `user_language_preference.md` or `feedback_*.md`. Apply their checklists.
 
-### Step 0: Action audit (the forcing function)
+For Chinese-primary users: first sentence + section headers in Chinese, no
+fragment-by-code-switch, jargon glossed on first mention. The skill MUST NOT
+cost the user the communication discipline they trained.
 
-**Before scanning for new gaps, audit what the user committed to last time.** This is the skill's anti-busywork mechanism. A retrospective that doesn't check whether prior commitments produced anything is just noise.
-
-1. Read the current detailed reference (`docs/learning-domains.md` or the path the user picked). Extract every **How to level up** action across all Tier 1 and Tier 2 items. Each action will name a concrete artifact — `STATS-CHEATSHEET.md`, `pnpm gemini:probe`, `docs/entity-erd.md`, a budget alert, a unit test, etc.
-2. For each named artifact, check whether it exists:
-   - Markdown files / docs → `git log --all -- <path>` or `find . -name <basename>`
-   - CLI flags / scripts → `grep -r "<flag>" .` or `find . -name "<script>"`
-   - Tests → check the corresponding test file
-   - Config / alerts → ask the user if the only check is "did you go set this up in the vendor console"
-3. Produce a one-table status report:
-
-   ```
-   Action                                    | Status        | Days since proposed
-   ──────────────────────────────────────────|───────────────|────────────────────
-   Write backend/evals/STATS-CHEATSHEET.md  | ✅ Done       | 14d
-   Add pnpm eval --explain-stats flag       | ❌ Not started | 14d
-   Write pnpm gemini:probe script           | ❌ Not started | 14d
-   Generate docs/entity-erd.md              | 🟡 Partial    | 14d
-   Spec-vs-impl checklist for ADR PRs       | ❌ Not started | 10d
-   ```
-
-4. **Decision rule**:
-   - If **≥1 action completed since last retro** AND <60% pending → proceed to Step 1 (new scan).
-   - If **0 actions completed** AND ≥3 actions pending more than 14 days → **push back**. Do not add new items. Tell the user:
-
-     > "Last retro proposed N actions. M are still untouched after K days. Adding new items now would just grow the list. Three options:
-     >
-     > A) **Commit** — pick one pending action and we mark it active. New scan after that's done.
-     > B) **Deprioritize** — name the actions you're explicitly killing. We update Tier or remove the item.
-     > C) **Override** — explain why a new scan matters more than closing old loops. I'll proceed but flag this in the run log."
-
-5. If user picks A or B in step 4, update the detailed reference and stop. The retro **completed without a new scan** — that's correct behavior. The forcing function did its job.
-6. If user picks C, proceed to Step 1 but write the override reason into the new retro under a `## Override notes` section.
-
-**Why this exists.** The biggest stickiness defect found in persona review: users who run `/retrospective` twice see nearly-identical output because no level-up action was completed between runs — which makes the skill feel like busywork. This step turns the skill from "another retro tool" into "an accountability loop where new items don't appear until old ones close or get killed."
-
-**Cost**: ~30 seconds for the file checks. The push-back path takes 1 turn of the user's time. The completed-actions path is free.
-
-### Step 1: Scan signal sources
-
-Run the scripts in `scripts/`:
-
-- `bash scripts/scan_git_signals.sh <repo-path> [days]` — extracts ADR count, review round counts (looks for `code-review fixes (max-effort pass)` or similar commit patterns), reversal events (closed-then-reissued issues), and stacked PR patterns. Default lookback: 365 days.
-- `python3 scripts/scan_chat_signals.py --project-id=<ID> --topics=<csv> [--days N]` — greps the user's session jsonl files for question particles (`啥意思?`, `why?`, `what is`, `不懂`, `explain`), tracks topic frequency in short user messages, and surfaces in-flight mental models ("X means Y, right?"). **Important**: must use `--project-id=<value>` with the `=` form — project IDs start with `-` and argparse mis-parses positional `-`-strings as flags. Topics is a comma-separated list of keywords; supply the ones relevant to the project (e.g. `eval,memory,gemini,voice`).
-
-The project-id is the directory name under `~/.claude/projects/`; for a repo at `/Users/foo/work/myproject` the ID is typically `-Users-foo-work-myproject`.
-
-Combine the outputs. If the scripts can't run (missing access, no git history, no chat archive), do the same work manually with `git log` / `gh issue list` / `Read` on session files. The scripts are an accelerant, not a hard dependency.
-
-### Step 2: Categorize by growth category × tier
-
-For each signal, ask:
-- Which of the five categories does this belong to? (domain / human skill / work habit / meta / productivity)
-- What tier? (use `references/signal_taxonomy.md` to translate signals to tiers)
-
-**Important — actively consider ALL 5 categories, not just domain knowledge.** Iteration-1 evals showed that without an explicit category checklist, the default bias is to over-index on category 1 (technical domains) and miss the other four. Before finalizing the tier table, sweep:
-
-- Did anything in this scan period reveal a **human skill** gap (decision-making, abstraction, communication clarity, asking precise questions)? Visible in chat patterns over weeks, not single PRs.
-- Did anything reveal a **work-habit** gap (ADR discipline, PR review cadence, doc follow-through)? Visible in git history.
-- Did anything reveal a **meta-cognitive** pattern (the user noticed something about how they themselves learn or decide)? Visible across multiple domains.
-- Did anything reveal a **productivity / focus / energy** pattern (commit timestamp distribution, session lengths, energy-time correlation)? Visible in timestamps.
-
-If any of these comes up empty after a careful look, that's fine — but the question must be asked explicitly each pass. Don't skip categories silently.
-
-Build a working table — see `references/examples.md` for what this looks like.
-
-### Step 3: Update both storage layers
-
-Read the existing short index (if any). For each new or changed item:
-
-1. **New item** — add a bullet to the short index under the correct tier; add a full five-field entry to the detailed reference.
-2. **Graduated item** — meets its graduation marker (e.g. "3 consecutive PRs without needing a stats consult") → move to Tier 3 in both, simplify detailed entry to 2 lines, optionally remove from index entirely.
-3. **Reversed item** — was Tier 3, now back to Tier 2 because something broke → bump up in both, note the reversal in the Signal field.
-4. **Unchanged item** — no signal change → leave alone, but note last-reviewed date.
-
-**Mandatory demotion check.** Every retrospective pass, walk each existing Tier 1 and Tier 2 item and ask: *"Does the current evidence still justify this tier, or has the graduation marker been quietly met?"* Items don't graduate on their own — the skill must actively check. Common cases:
-
-- A Tier 3-candidate (e.g. "iOS release pipeline") has been stable for the marker period AND the marker is a no-incident type — demote.
-- A Tier 1 item has had no level-up actions completed AND no fresh signal AND no incident — leave at Tier 1 but flag in Step 5 as "stuck."
-- A Tier 2 passive item is past its revisit trigger — surface to user, don't demote automatically.
-
-Iteration-1 evals showed both with- and without-skill runs spontaneously demoted iOS release + Supabase DDL — make this an explicit step so it doesn't depend on luck.
-
-**Incremental discipline.** Before editing, READ the current state of both files. If they were updated since the last retro (e.g. by a different session, a linter, or another agent), prefer **append-only updates** (a `## Update log` section, or a new Tier entry) over in-place edits of existing entries — you may not have the full context that produced the recent change. In-place edits are fine when YOU are the only writer this session.
-
-Use the templates in `assets/templates/`. Use `scripts/render_storage.py` if it helps, or write the files directly with the templates as guidance.
-
-### Step 4: Generate the learning journey
-
-For every Tier 1 and Tier 2 item, the detailed reference needs a **"How to level up"** section with 2-3 concrete actions, and a **graduation marker** that defines what "done" looks like.
-
-See `references/learning_journey.md` for principles. The short version:
-
-- **Each action must be doable in under 4 hours** of focused work. If it's bigger, decompose.
-- **Actions externalize the knowledge** — write a cheatsheet, build a probe script, add a telemetry alert, draw a diagram. Reading more rarely shrinks gaps; producing artifacts does.
-- **The graduation marker is observable**, not subjective. "3 PRs without consulting `/codex` on stats" beats "feel confident with stats".
-- **Tier 2 items often need passive markers** — "revisit when sessions/mo > 500" — instead of active practice. Don't force level-up actions on a decided-and-paused item.
-
-### Step 5: Surface the gap-shrinking signal
-
-After updating, compute and show the user:
-
-- **Items graduated since last review** — these are wins, name them.
-- **Items still in Tier 1 from N weeks ago** — these are the stuck spots; investigate why level-up actions didn't fire.
-- **New items added** — what surfaced this period? Is the user picking up a new domain or did an old gap re-emerge?
-- **Velocity delta on tracked items** — for any item with measurable signal (review rounds, decision time, side-chat question frequency), show the trend. The target is monotone-decreasing.
-
-A single one-paragraph summary at the end is enough. Don't write a long retrospective doc unless the user explicitly asks. The artifacts (short index + detailed reference) ARE the retrospective.
+---
 
 ## Incremental vs full mode
 
-**Incremental** (default for milestone / session-end triggers): scan ONLY the delta since last review. Look at the most recent N commits, the most recent session's chat, the most recent ADR. Update what changed; don't rewrite untouched entries. Should take ≤ 5 minutes.
+- **Incremental** (default for milestones / session-end): scan only the delta
+  since last review. ≤5 min.
+- **Full** (explicit slash command, weekly cadence, first-time): full repo +
+  chat-history scan. ≤20 min.
 
-**Full** (default for explicit slash command, weekly cadence, or first-time setup): scan the entire repo history + all chat sessions. Useful for catching slow drift that incremental misses. Should take ≤ 20 minutes.
+Infer from context if unspecified. Explicit slash command → full unless user
+says otherwise; everything else → incremental.
 
-If the user doesn't specify, infer from context — explicit slash command = full unless they said otherwise; everything else = incremental.
+---
 
 ## Anti-patterns
 
-Things this skill should NOT do:
+| Don't | Why |
+|---|---|
+| Track expertise | The log is for what's still hard, not what's mastered |
+| Pad with vague items ("be a better engineer") | Vague = unverifiable = never graduates |
+| Generate inspirational content | Terse and signal-dense only |
+| Re-run on every session | Proactive trigger fires AT MOST once per session |
+| Skip Phase 0 | Bypassing the forcing function turns the log into a hoarder list |
+| Skip Phase 4 LAUNCH | Identifying gaps without launching is decoration |
+| Generic MCQ ("explain X") | MCQ must be anchored to user's own files |
+| Hand-wave the MCQ ground truth | Every correct answer cites a verifiable artifact |
+| Re-introduce a graduated item as new | Check the log first; escalate, don't duplicate |
+| Block on missing scripts | Scripts are accelerants; manual extraction always works |
 
-- **Track expertise**, only gaps. If the user is fluent in product strategy, that doesn't belong in the growth log. The log is for what's still hard.
-- **Pad with vague items.** "Be a better engineer" is not a tracked item. "Land 3 stats PRs without `/codex` consult" is.
-- **Generate inspirational content.** No "you got this!" headers, no journey-of-a-thousand-steps framing. Terse and signal-dense.
-- **Re-run on every session.** The proactive trigger fires AT MOST once per session, and only if ≥30 turns of substantive work. Otherwise it becomes noise.
-- **Block on missing scripts.** If a script fails or doesn't exist for this project setup, fall back to manual signal extraction via `git log`, `gh`, and reading session files. The scripts speed things up; they don't define the skill.
-- **Insist on a particular file path.** The detailed reference defaults to `<repo>/docs/learning-domains.md`, but if the user's repo uses a different docs convention, follow theirs. The short index path inside `~/.claude/projects/<project-id>/memory/` is more stable — keep it consistent.
-- **Violate the user's loaded communication rules.** If the user has `feedback_*` or `user_language_preference.md` memories about how to talk in chat (Chinese-primary, jargon glosses, GH issue/PR prefixes, sentence completeness), the skill's chat reply MUST satisfy them. See the "Chat output discipline" section below.
-
-## Output discipline
-
-### What to include in the user-facing reply
-
-After running, the user should see:
-
-1. A one-paragraph summary of what changed.
-2. The file paths of the short index and detailed reference (so they can open them).
-3. The top 1-3 level-up actions for this period (if any new ones added).
-4. Any graduations or reversals, named explicitly.
-
-That's it. Don't dump the full updated files in the chat. They're files; the user can open them.
-
-### Chat output discipline — follow the user's loaded language rules
-
-The chat reply you produce is subject to **the user's existing language / communication memories**, not just this skill's instructions. Before sending the reply, scan whatever files are loaded under `~/.claude/projects/<project-id>/memory/` that look like communication or style rules (typical filenames: `user_language_preference.md`, `feedback_complete_sentences.md`, `feedback_gh_reference_prefix.md`, anything starting with `feedback_*`). Apply their checklists.
-
-For Chinese-primary users specifically, iteration-1 evals revealed a real defect: the skill's `with_skill` run on the keyword-trigger test produced an evidence-rich answer but **forgot the user's "4-character Chinese gloss on first-mention of new jargon" rule** — the same rule the `without_skill` baseline naturally followed. This is unacceptable: the skill must not regress communication discipline. If you see a `feedback_complete_sentences.md` (or equivalent) memory, treat its self-check as a hard precondition to sending the reply — at minimum:
-
-- First sentence and section headers in the user's primary chat language.
-- No fragmented code-switch sentences (Chinese particles glued around English shorthand, or vice versa).
-- New jargon terms get a short gloss in the user's primary language on first mention, per the rules in their memory.
-
-This applies to every reply this skill generates, including incremental updates, level-up action narratives, and graduation announcements. The skill's value-add must NEVER cost the user the language discipline they've trained.
+---
 
 ## Cross-references
 
-- `references/signal_taxonomy.md` — full taxonomy of decision-velocity signals (strong / medium / weak / anti-signals).
-- `references/growth_categories.md` — deeper guidance on each of the 5 growth categories with examples.
-- `references/learning_journey.md` — how to write effective level-up actions and graduation markers.
-- `references/examples.md` — a real worked example from `squishy-platypus`, showing what the index and detailed reference look like after a year of use.
-- `assets/templates/short_index.md` — the exact format for the memory-loaded short index.
-- `assets/templates/detailed_reference.md` — the exact format for the repo-side detailed reference.
-- `scripts/scan_git_signals.sh` — automated git-history signal extraction.
-- `scripts/scan_chat_signals.py` — automated chat / side-chat signal extraction.
-- `scripts/render_storage.py` — helper to render a category × tier table into both layers.
+- `references/signal_taxonomy.md` — full decision-velocity signal list
+- `references/growth_categories.md` — deeper guidance on the 5 categories
+- `references/learning_journey.md` — level-up actions + graduation markers
+- `references/examples.md` — worked example from `squishy-platypus`
+- `assets/templates/short_index.md` + `assets/templates/detailed_reference.md`
+- `scripts/scan_git_signals.sh`, `scripts/scan_chat_signals.py`, `scripts/render_storage.py`
 
-If any reference file is missing for the user's project (e.g. no session jsonl archive), use the templates as guidance and produce the layers by hand. The skill works without the scripts; it's faster with them.
+If any reference file is missing for the user's project, use templates as
+guidance and produce the layers by hand. The skill works without the scripts.

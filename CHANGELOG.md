@@ -4,11 +4,23 @@ All notable changes to this skill. Format inspired by [Keep a Changelog](https:/
 
 ## [Unreleased]
 
+## [v0.3.0] — 2026-05-26
+
 ### Added
+- **Phase 4 LAUNCH** in `SKILL.md` — every top gap now emits two artifacts: (a) a portable research prompt for Deep Research / NotebookLM / ChatGPT, (b) an anchored MCQ (4 questions, 2-3 min) grounded in the user's own codebase. Closes the verification loop: external research → anchored test → tier transition. Ground truth comes from the user's files / ADRs / commits, not the AI's knowledge — defends against hallucinated answer keys.
+- Predict-then-reveal MCQ form — at least one of the 4 questions asks the user to predict a past ADR's actual rationale before revealing it. Highest-retention question form (prediction-error feedback in learning science).
+- Explicit skip rules for MCQ — taste gaps (design opinion) use Explain-back; muscle memory (vim, shell) uses practice. Skill is honest about what verification mechanisms can and can't cover.
 - `FAQ.md` — preempt persona-review pushback (framework allergy, 5-category skepticism, 3-layer concern, forcing-function annoyance, Layer 3 verification horizon, team use, uninstall)
 - `docs/comparisons.md` — detailed side-by-side vs `/retro`, `/learn`, `claude-mem`, `nessie` across 5 dimensions, with "when to install which" recommendations
 - `examples/dogfood-audit-2026-05-25.md` — first real Layer 3 evidence: ran Step 0 Action Audit on creator's own project (138 commits / 14 days, 0/11 actions completed). Single-user 30-day experiment with verifiable predictions.
 - `.github/workflows/validate.yml` — CI checks SKILL.md frontmatter, required files, ShellCheck, Python syntax, evals.json structure, SKILL.md line budget (≤350)
+
+### Changed
+- **Full SKILL.md refactor to meta-prompt form.** ~260 lines of prose → ~190 lines of principles + invariant tables. Five phases (AUDIT → SWEEP → RANK → ANCHOR → LAUNCH) explicit and table-driven. Reads like a specification, not a tutorial.
+- Description in frontmatter trimmed and updated to mention Phase 4 LAUNCH + ground-truth MCQ.
+
+### Notes
+- The v0.3.0 refactor is a structural change to the skill body, not just additive. Behavior under existing triggers should be the same except for the addition of Phase 4 LAUNCH output. Worked examples from v0.2.0 are still valid as baseline.
 
 ## [v0.2.0] — 2026-05-25
 
