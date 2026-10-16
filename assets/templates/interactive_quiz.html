@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{TITLE}} — Growth Retrospective Interactive Lab</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-elevated: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.14);
+      --success: #22c55e;
+      --success-soft: rgba(34, 197, 94, 0.16);
+      --danger: #ef4444;
+      --danger-soft: rgba(239, 68, 68, 0.16);
+      --warning: #f59e0b;
+      --warning-soft: rgba(245, 158, 11, 0.16);
+      --purple: #a855f7;
+      --purple-soft: rgba(168, 85, 247, 0.16);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    /* Header & Score Bar */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+    }
+    .top-bar-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+    .score-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-family: var(--font-mono);
+    }
+    .progress-track {
+      width: 100px;
+      height: 6px;
+      background: var(--bg-elevated);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Calibration & Context Hero */
+    .hero-card {
+      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .badge {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-accent { background: var(--accent-soft); color: var(--accent); border: 1px solid rgba(56,189,248,0.3); }
+    .badge-warning { background: var(--warning-soft); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
+    .badge-purple { background: var(--purple-soft); color: var(--purple); border: 1px solid rgba(168,85,247,0.3); }
+    .badge-success { background: var(--success-soft); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+
+    .hero-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .hero-sub {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Calibration Controls inside HTML */
+    .calibration-bar {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .cal-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .cal-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .cal-select {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: var(--font-sans);
+      cursor: pointer;
+    }
+
+    /* Theme Tabs */
+    .theme-tabs {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+    .theme-tab {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .theme-tab:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .theme-tab.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    /* Study Mode Switcher (In-Agent Briefing vs External Prompt) */
+    .study-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .study-header {
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .mode-pills {
+      display: flex;
+      gap: 6px;
+    }
+    .mode-pill {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .mode-pill.active {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+    }
+    .study-body {
+      padding: 20px;
+    }
+    .briefing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .briefing-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .briefing-card h4 {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .briefing-card p {
+      font-size: 13.5px;
+      color: #e2e8f0;
+    }
+    .anchor-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: rgba(15, 23, 42, 0.9);
+      border-left: 3px solid var(--warning);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #cbd5e1;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .prompt-box {
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      position: relative;
+    }
+
+    /* Questions Section */
+    .q-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 20px;
+      transition: border-color 0.2s;
+    }
+    .q-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .q-num {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .q-prompt {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    /* Predict-then-reveal gate */
+    .predict-gate {
+      background: var(--purple-soft);
+      border: 1px dashed var(--purple);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .predict-gate-title {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #d8b4fe;
+      margin-bottom: 6px;
+    }
+    .predict-input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 12px;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    /* Options */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .opt-btn {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 16px;
+      text-align: left;
+      color: var(--text);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: all 0.18s ease;
+    }
+    .opt-btn:hover:not(.disabled) {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.06);
+    }
+    .opt-key {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .opt-btn.correct {
+      border-color: var(--success);
+      background: var(--success-soft);
+    }
+    .opt-btn.correct .opt-key {
+      background: var(--success);
+      color: #052e16;
+    }
+    .opt-btn.wrong {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+    }
+    .opt-btn.wrong .opt-key {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    /* Diagnostic Feedback Box */
+    .feedback-box {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      display: none;
+    }
+    .feedback-box.visible { display: block; }
+    .feedback-box.ok {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+    .feedback-box.err {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+    .ground-truth-tag {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    /* Level-up & Graduation Receipt Card */
+    .receipt-card {
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 28px;
+    }
+    .action-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-top: 8px;
+      font-size: 13.5px;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: var(--bg-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Bar -->
+  <header class="top-bar">
+    <div class="top-bar-inner">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span>Growth Retrospective · Interactive Verification Lab</span>
+      </div>
+      <div class="score-pill">
+        <span id="scoreText">Score: 0 / 0</span>
+        <div class="progress-track">
+          <div id="progressBar" class="progress-fill"></div>
+        </div>
+        <button onclick="resetQuizProgress()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:11px;" title="Reset answers">↺ Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero & Quick Calibration Bar -->
+    <section class="hero-card">
+      <div class="badge-row">
+        <span class="badge badge-accent" id="projectBadge">PROJECT</span>
+        <span class="badge badge-purple" id="purposeBadge">PURPOSE: CALIBRATED</span>
+        <span class="badge badge-warning" id="dateBadge">DATE</span>
+      </div>
+      <h1 class="hero-title" id="quizMainTitle">Growth Retrospective Lab</h1>
+      <p class="hero-sub" id="quizSubTitle">Ground truth is anchored strictly to your own codebase files, ADRs, and commits — zero AI-hallucinated answer keys.</p>
+
+      <!-- Interactive Calibration Filter Bar -->
+      <div class="calibration-bar">
+        <div class="cal-group">
+          <span class="cal-label">🎯 Learning Purpose:</span>
+          <select id="purposeSelector" class="cal-select" onchange="updateCalibrationPurpose(this.value)">
+            <option value="unblock">Unblock Immediate Decision (解决当前卡点)</option>
+            <option value="mental-model">Build Deep Mental Model (建立底层心智模型)</option>
+            <option value="guardrail">Prevent Recurring Regressions (防止同类返工/幻觉)</option>
+            <option value="articulate">Tech Sharing / ADR Defense (技术复盘与表达)</option>
+          </select>
+        </div>
+        <div class="cal-group">
+          <span class="cal-label">📚 Default Study Mode:</span>
+          <select id="studyModeSelector" class="cal-select" onchange="setGlobalStudyMode(this.value)">
+            <option value="in-agent">🧠 In-Agent Deep-Dive Briefing (Agent 内直接精讲)</option>
+            <option value="notebooklm">🔬 External NotebookLM / Deep Research Prompt</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Theme Switcher Tabs -->
+    <nav class="theme-tabs" id="themeTabs"></nav>
+
+    <!-- Active Theme Content Container -->
+    <div id="themeContainer"></div>
+
+    <!-- Mastery Receipt & Level-Up Commitment Footer -->
+    <section class="receipt-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
+        <div>
+          <span class="badge badge-success" style="margin-bottom:6px;display:inline-block;">CLOSING THE LOOP</span>
+          <h3 style="font-size:18px;font-weight:700;">Mastery Receipt & Level-Up Action Commitment</h3>
+          <p style="font-size:13px;color:var(--text-muted);">Check off or commit to one concrete &le;4h artifact action below, then copy your receipt back to the agent.</p>
+        </div>
+        <button class="btn-primary" onclick="copyMasteryReceipt()">📋 Copy Mastery Receipt for Agent</button>
+      </div>
+      <div id="levelUpList"></div>
+      <pre id="receiptPreview" class="anchor-box hidden" style="margin-top:14px;"></pre>
+    </section>
+  </main>
+
+  <script>
+    // Injected Quiz Payload from render_quiz_html.py
+    const QUIZ_DATA = {{QUIZ_JSON_PAYLOAD}};
+    const STORAGE_KEY = "growth_retro_quiz_" + (QUIZ_DATA.id || "default");
+
+    let state = {
+      activeThemeIdx: 0,
+      studyMode: QUIZ_DATA.defaultStudyMode || "in-agent",
+      purpose: QUIZ_DATA.purpose || "guardrail",
+      answers: {},       // { "themeIdx_qIdx": selectedOptIdx }
+      predictions: {},   // { "themeIdx_qIdx": text }
+      committedActions: {},
+      explainBackNotes: {}
+    };
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          state = { ...state, ...parsed };
+        }
+      } catch (e) {}
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function initApp() {
+      loadState();
+      document.getElementById("projectBadge").textContent = QUIZ_DATA.project || "PROJECT";
+      document.getElementById("dateBadge").textContent = QUIZ_DATA.date || "2026";
+      document.getElementById("quizMainTitle").textContent = QUIZ_DATA.title || "Growth Retrospective Interactive Lab";
+      if (QUIZ_DATA.subtitle) {
+        document.getElementById("quizSubTitle").textContent = QUIZ_DATA.subtitle;
+      }
+      document.getElementById("purposeSelector").value = state.purpose;
+      document.getElementById("studyModeSelector").value = state.studyMode;
+      updatePurposeBadge();
+
+      renderTabs();
+      renderActiveTheme();
+      renderScoreAndReceipt();
+    }
+
+    function updatePurposeBadge() {
+      const labels = {
+        "unblock": "🎯 PURPOSE: UNBLOCK DECISION",
+        "mental-model": "🎯 PURPOSE: DEEP MENTAL MODEL",
+        "guardrail": "🎯 PURPOSE: PREVENT REGRESSIONS",
+        "articulate": "🎯 PURPOSE: TECH ARTICULATION"
+      };
+      document.getElementById("purposeBadge").textContent = labels[state.purpose] || "🎯 CALIBRATED";
+    }
+
+    function updateCalibrationPurpose(val) {
+      state.purpose = val;
+      saveState();
+      updatePurposeBadge();
+      renderActiveTheme();
+      renderScoreAndReceipt();
+    }
+
+    function setGlobalStudyMode(val) {
+      state.studyMode = val;
+      saveState();
+      renderActiveTheme();
+    }
+
+    function selectTheme(idx) {
+      state.activeThemeIdx = idx;
+      saveState();
+      renderTabs();
+      renderActiveTheme();
+    }
+
+    function renderTabs() {
+      const nav = document.getElementById("themeTabs");
+      const themes = QUIZ_DATA.themes || [];
+      nav.innerHTML = themes.map((t, idx) => {
+        const qs = t.questions || [];
+        let answered = 0;
+        let correct = 0;
+        qs.forEach((q, qIdx) => {
+          const k = `${idx}_${qIdx}`;
+          if (state.answers[k] !== undefined) {
+            answered++;
+            if (state.answers[k] === q.correctIndex) correct++;
+          }
+        });
+        const statusIcon = (answered === qs.length && qs.length > 0)
+          ? (correct === qs.length ? "✅" : `${correct}/${qs.length}`)
+          : `${answered}/${qs.length}`;
+        return `
+          <button class="theme-tab ${idx === state.activeThemeIdx ? 'active' : ''}" onclick="selectTheme(${idx})">
+            <span>[${t.tier || 'Tier 1'}] ${t.title}</span>
+            <span class="badge ${correct === qs.length && qs.length > 0 ? 'badge-success' : 'badge-accent'}">${statusIcon}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderActiveTheme() {
+      const container = document.getElementById("themeContainer");
+      const themes = QUIZ_DATA.themes || [];
+      const theme = themes[state.activeThemeIdx];
+      if (!theme) {
+        container.innerHTML = `<div class="q-card">No themes found in quiz spec.</div>`;
+        return;
+      }
+
+      const b = theme.briefing || {};
+      const inAgentActive = state.studyMode === "in-agent";
+
+      let studyHtml = `
+        <section class="study-panel">
+          <div class="study-header">
+            <div>
+              <span class="badge badge-warning">${theme.category || 'domain knowledge'}</span>
+              <strong style="margin-left:8px;font-size:15px;">${theme.title}</strong>
+              <span style="color:var(--text-muted);font-size:12px;font-family:var(--font-mono);margin-left:8px;">Anchor: ${theme.anchor || 'repo'}</span>
+            </div>
+            <div class="mode-pills">
+              <button class="mode-pill ${inAgentActive ? 'active' : ''}" onclick="setGlobalStudyMode('in-agent')">🧠 In-Agent Briefing</button>
+              <button class="mode-pill ${!inAgentActive ? 'active' : ''}" onclick="setGlobalStudyMode('notebooklm')">🔬 External Research Prompt</button>
+            </div>
+          </div>
+          <div class="study-body">
+            ${inAgentActive ? `
+              <div class="briefing-grid">
+                <div class="briefing-card">
+                  <h4>1. Why It Matters Here</h4>
+                  <p>${b.whyItMatters || 'Directly impacts decision velocity and reliability in the anchored module.'}</p>
+                </div>
+                <div class="briefing-card">
+                  <h4>2. Production Failure Modes</h4>
+                  <p>${b.failureModes || 'Silent regressions, state corruption, or multi-round review reversals.'}</p>
+                </div>
+                <div class="briefing-card">
+                  <h4>3. Idiomatic Stack Pattern</h4>
+                  <p>${b.stackPattern || 'Ground state in verifiable schemas and deterministic validation.'}</p>
+                </div>
+                <div class="briefing-card">
+                  <h4>4. Misconception vs Reality</h4>
+                  <p>${b.misconceptions || 'Assuming happy-path defaults hold without explicit boundary checks.'}</p>
+                </div>
+              </div>
+              ${theme.anchorSnippet ? `<div class="anchor-box"><strong>📍 Ground-Truth Repo Anchor (${theme.anchor}):</strong>\n${escapeHtml(theme.anchorSnippet)}</div>` : ''}
+            ` : `
+              <div style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:13px;color:var(--text-muted);">Copy-paste to Gemini Deep Research, NotebookLM, or ChatGPT when you want an external literature survey:</span>
+                <button class="btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="copyText(${ JSON.stringify(theme.researchPrompt || '') })">📋 Copy Prompt</button>
+              </div>
+              <div class="prompt-box">${escapeHtml(theme.researchPrompt || '')}</div>
+            `}
+          </div>
+        </section>
+      `;
+
+      const questionsHtml = (theme.questions || []).map((q, qIdx) => renderQuestionCard(state.activeThemeIdx, q, qIdx)).join("");
+
+      // Optional Explain-Back Sandbox if purpose === 'articulate' or theme.explainBackPrompt
+      let explainHtml = "";
+      if (state.purpose === "articulate" || theme.explainBackPrompt) {
+        const ebKey = `eb_${state.activeThemeIdx}`;
+        const savedNote = state.explainBackNotes[ebKey] || "";
+        explainHtml = `
+          <div class="q-card">
+            <div class="q-header">
+              <span class="q-num">EXPLAIN-BACK SANDBOX (FEYNMAN TECHNIQUE)</span>
+              <span class="badge badge-purple">SELF-ARTICULATION</span>
+            </div>
+            <div class="q-prompt">${theme.explainBackPrompt || `In 3–5 sentences, explain the core trade-off behind "${theme.title}" and why your codebase's anchor (${theme.anchor}) works the way it does:`}</div>
+            <textarea class="predict-input" rows="4" placeholder="Write your explanation in your own words..." oninput="saveExplainBack('${ebKey}', this.value)">${escapeHtml(savedNote)}</textarea>
+          </div>
+        `;
+      }
+
+      container.innerHTML = studyHtml + questionsHtml + explainHtml;
+    }
+
+    function renderQuestionCard(tIdx, q, qIdx) {
+      const k = `${tIdx}_${qIdx}`;
+      const chosen = state.answers[k];
+      const isAnswered = chosen !== undefined;
+      const isCorrect = chosen === q.correctIndex;
+      const isPredictForm = (q.form || "").toLowerCase().includes("predict");
+      const hasPredicted = Boolean((state.predictions[k] || "").trim()) || isAnswered;
+
+      const letters = ["A", "B", "C", "D", "E"];
+
+      let predictGateHtml = "";
+      if (isPredictForm && !hasPredicted) {
+        predictGateHtml = `
+          <div class="predict-gate">
+            <div class="predict-gate-title">🔮 PREDICT-THEN-REVEAL GATE (Learning Science: Prediction-Error Boost)</div>
+            <p style="font-size:12.5px;color:#e9d5ff;">Before unlocking the options & ADR rationale, type a 5-word hypothesis or click unlock to commit your mental prediction:</p>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <input type="text" id="predInput_${k}" class="predict-input" style="margin-top:0;" placeholder="My prediction: it was chosen because...">
+              <button class="btn-primary" style="white-space:nowrap;" onclick="commitPrediction('${k}')">Unlock Options ➔</button>
+            </div>
+          </div>
+        `;
+      }
+
+      const optionsHtml = (q.options || []).map((optText, oIdx) => {
+        let cls = "opt-btn";
+        if (isAnswered) {
+          if (oIdx === q.correctIndex) cls += " correct";
+          else if (oIdx === chosen) cls += " wrong";
+        }
+        const disabledAttr = (isPredictForm && !hasPredicted) ? "disabled style='opacity:0.4;pointer-events:none;'" : "";
+        return `
+          <button class="${cls}" ${disabledAttr} onclick="selectOption(${tIdx}, ${qIdx}, ${oIdx})">
+            <span class="opt-key">${letters[oIdx] || (oIdx + 1)}</span>
+            <span style="flex:1;">${escapeHtml(optText)}</span>
+          </button>
+        `;
+      }).join("");
+
+      let feedbackHtml = "";
+      if (isAnswered) {
+        const perOptExplain = (q.optionExplanations && q.optionExplanations[chosen])
+          ? q.optionExplanations[chosen]
+          : q.explanation;
+        feedbackHtml = `
+          <div class="feedback-box visible ${isCorrect ? 'ok' : 'err'}">
+            <div style="font-weight:700;margin-bottom:4px;">
+              ${isCorrect ? '✅ Spot on! Ground-truth verified.' : `❌ Not quite. You picked (${letters[chosen]}), but the ground-truth answer is (${letters[q.correctIndex]}).`}
+            </div>
+            <div>${escapeHtml(perOptExplain || q.explanation || '')}</div>
+            <div class="ground-truth-tag">📌 Ground-Truth Artifact: ${escapeHtml(q.groundTruth || 'Verified in repository')}</div>
+          </div>
+        `;
+      }
+
+      return `
+        <article class="q-card" id="qcard_${k}">
+          <div class="q-header">
+            <span class="q-num">QUESTION 0${qIdx + 1}</span>
+            <span class="badge ${isPredictForm ? 'badge-purple' : 'badge-accent'}">${q.form || 'STATE'}</span>
+          </div>
+          <div class="q-prompt">${escapeHtml(q.question)}</div>
+          ${predictGateHtml}
+          <div class="options-list">${optionsHtml}</div>
+          ${feedbackHtml}
+        </article>
+      `;
+    }
+
+    function commitPrediction(k) {
+      const inp = document.getElementById("predInput_" + k);
+      state.predictions[k] = (inp && inp.value.trim()) ? inp.value.trim() : "committed";
+      saveState();
+      renderActiveTheme();
+    }
+
+    function selectOption(tIdx, qIdx, oIdx) {
+      const k = `${tIdx}_${qIdx}`;
+      state.answers[k] = oIdx;
+      saveState();
+      renderTabs();
+      renderActiveTheme();
+      renderScoreAndReceipt();
+    }
+
+    function saveExplainBack(key, val) {
+      state.explainBackNotes[key] = val;
+      saveState();
+    }
+
+    function toggleActionCommit(actionKey) {
+      state.committedActions[actionKey] = !state.committedActions[actionKey];
+      saveState();
+      renderScoreAndReceipt();
+    }
+
+    function renderScoreAndReceipt() {
+      const themes = QUIZ_DATA.themes || [];
+      let totalQ = 0;
+      let answeredQ = 0;
+      let correctQ = 0;
+
+      themes.forEach((t, tIdx) => {
+        (t.questions || []).forEach((q, qIdx) => {
+          totalQ++;
+          const k = `${tIdx}_${qIdx}`;
+          if (state.answers[k] !== undefined) {
+            answeredQ++;
+            if (state.answers[k] === q.correctIndex) correctQ++;
+          }
+        });
+      });
+
+      const pct = totalQ > 0 ? Math.round((correctQ / totalQ) * 100) : 0;
+      document.getElementById("scoreText").textContent = `Mastery: ${correctQ} / ${totalQ} (${pct}%)`;
+      document.getElementById("progressBar").style.width = `${totalQ > 0 ? Math.round((answeredQ / totalQ) * 100) : 0}%`;
+
+      // Render level-up actions across themes
+      const actionsContainer = document.getElementById("levelUpList");
+      let actionsHtml = "";
+      themes.forEach((t, tIdx) => {
+        (t.levelUpActions || []).forEach((act, aIdx) => {
+          const ak = `${tIdx}_${aIdx}`;
+          const checked = Boolean(state.committedActions[ak]);
+          actionsHtml += `
+            <label class="action-item" onclick="toggleActionCommit('${ak}')">
+              <input type="checkbox" ${checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleActionCommit('${ak}');" style="margin-top:4px;">
+              <div>
+                <span class="badge badge-accent" style="margin-right:6px;">${t.title}</span>
+                <span>${escapeHtml(act)}</span>
+              </div>
+            </label>
+          `;
+        });
+      });
+      actionsContainer.innerHTML = actionsHtml || `<p style="font-size:13px;color:var(--text-muted);">No pending level-up actions defined.</p>`;
+    }
+
+    function buildReceiptMarkdown() {
+      const themes = QUIZ_DATA.themes || [];
+      let lines = [
+        `### Growth Retrospective Mastery Receipt (${QUIZ_DATA.date || 'Today'})`,
+        `- **Project**: ${QUIZ_DATA.project || 'Repo'}`,
+        `- **Calibrated Purpose**: ${state.purpose}`,
+        `- **Study Mode**: ${state.studyMode}`,
+        ``
+      ];
+      themes.forEach((t, tIdx) => {
+        const qs = t.questions || [];
+        let corr = 0;
+        qs.forEach((q, qIdx) => {
+          if (state.answers[`${tIdx}_${qIdx}`] === q.correctIndex) corr++;
+        });
+        lines.push(`- **[${t.tier || 'Tier 1'}] ${t.title}** (${t.anchor}): **${corr}/${qs.length}** verified`);
+      });
+
+      const committed = [];
+      themes.forEach((t, tIdx) => {
+        (t.levelUpActions || []).forEach((act, aIdx) => {
+          if (state.committedActions[`${tIdx}_${aIdx}`]) {
+            committed.push(`  - [ ] (${t.title}) ${act}`);
+          }
+        });
+      });
+      if (committed.length > 0) {
+        lines.push(`\n**Committed Level-Up Actions (<=4h):**`);
+        lines.push(...committed);
+      }
+      return lines.join("\n");
+    }
+
+    function copyMasteryReceipt() {
+      const md = buildReceiptMarkdown();
+      const pre = document.getElementById("receiptPreview");
+      pre.textContent = md;
+      pre.classList.remove("hidden");
+      navigator.clipboard.writeText(md).then(() => {
+        alert("Mastery Receipt copied to clipboard! Paste it in your agent chat to record progress.");
+      }).catch(() => {});
+    }
+
+    function copyText(txt) {
+      navigator.clipboard.writeText(txt).then(() => {
+        alert("Research Prompt copied to clipboard!");
+      }).catch(() => {});
+    }
+
+    function resetQuizProgress() {
+      if (!confirm("Reset all quiz answers for this session?")) return;
+      state.answers = {};
+      state.predictions = {};
+      saveState();
+      renderTabs();
+      renderActiveTheme();
+      renderScoreAndReceipt();
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    window.addEventListener("DOMContentLoaded", initApp);
+  </script>
+</body>
+</html>

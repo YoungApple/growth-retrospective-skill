@@ -41,8 +41,10 @@ jobs:
                    references/examples.md \
                    assets/templates/short_index.md \
                    assets/templates/detailed_reference.md \
+                   assets/templates/interactive_quiz.html \
                    scripts/scan_git_signals.sh \
                    scripts/scan_chat_signals.py \
+                   scripts/render_quiz_html.py \
                    evals/evals.json; do
             if [ ! -f "$f" ]; then
               echo "❌ Required file missing: $f"
@@ -60,13 +62,15 @@ jobs:
 
       - name: Validate Python script syntax
         run: |
-          python3 -m py_compile scripts/scan_chat_signals.py
-          echo "✅ scan_chat_signals.py syntax OK"
+          python3 -m py_compile scripts/scan_chat_signals.py scripts/render_quiz_html.py
+          echo "✅ Python scripts syntax OK"
 
-      - name: Smoke test scan_chat_signals.py argparse
+      - name: Smoke test scan_chat_signals.py and render_quiz_html.py
         run: |
           python3 scripts/scan_chat_signals.py --help > /dev/null
-          echo "✅ scan_chat_signals.py --help works"
+          python3 scripts/render_quiz_html.py --demo --output /tmp/ci_demo_quiz.html
+          test -s /tmp/ci_demo_quiz.html
+          echo "✅ CLI smoke tests OK"
 
       - name: Validate evals.json
         run: |

@@ -4,6 +4,16 @@ All notable changes to this skill. Format inspired by [Keep a Changelog](https:/
 
 ## [Unreleased]
 
+## [v0.4.0] — 2026-10-16
+
+### Added
+- **Phase 4 CALIBRATE (Quick Survey)** in `SKILL.md` — 30-second interactive calibration survey right after `ANCHOR`: (1) Focused Theme(s) multi-select from the retro findings, (2) Learning Purpose (`unblock` immediate decision | `mental-model` | `guardrail` against regressions | `articulate` for sharing/ADR defense), and (3) Delivery Mode (`in-agent-html` | `external-html` | `chat-inline`). Uses the host agent's native `ask_question` / `AskUserQuestion` modal when available.
+- **Dual-Mode Research Execution** in Phase 5 `LAUNCH` — pressure-tested the assumption that self-growth must happen externally in NotebookLM. **Mode A: In-Agent Deep-Dive Briefing (Default)** synthesizes a 4-pillar code-anchored briefing (*Why it matters here*, *Production failure modes*, *Idiomatic stack pattern*, *Misconception vs reality*) directly inside the agent and HTML lab with zero context-switching. **Mode B: External Research / NotebookLM Pack (Opt-in)** remains available for multi-paper literature reviews or commute audio podcasts.
+- **Interactive HTML Verification Lab (`scripts/render_quiz_html.py` + `assets/templates/interactive_quiz.html`)** — compiles a structured JSON quiz spec into a self-contained, zero-dependency interactive HTML app (`<repo>/.growth-log/quiz-<YYYY-MM-DD>.html`). Features live purpose/mode switcher, side-by-side In-Agent Briefing & 1-click NotebookLM prompt, 4-question Anchored MCQ engine with a **Predict-Then-Reveal commitment gate**, per-option diagnostic feedback citing `<file>:<line>` / `ADR-N`, Feynman Explain-Back sandbox, and a 1-click **Mastery Receipt** generator.
+
+### Changed
+- Core loop expanded from 5 to 6 explicit phases (`AUDIT → SWEEP → RANK → ANCHOR → CALIBRATE → LAUNCH`), keeping `SKILL.md` at 240 lines (well under the 350-line budget).
+
 ## [v0.3.0] — 2026-05-26
 
 ### Added

@@ -82,15 +82,22 @@ Graduation marker 必须 **可观测 + 有上下界 + 可逆**："连续 3 个 P
 
 ---
 
-## 工作流 —— skill 真正做的事
+## 工作流 —— 6 阶段核心闭环 (v0.4.0)
 
-任何方式触发后（slash command `/retrospective`、`/reflect`、`/growth-review`，或者关键词 "我最大的 gap 在哪"、"review my growth"、"回顾我的成长"），skill 跑 5 步：
+任何方式触发后（slash command `/retrospective`、`/reflect`、`/growth-review`、`/growth-retrospective`，或者关键词 "我最大的 gap 在哪"、"review my growth"、"回顾我的成长"），skill 跑 6 步：
 
-1. **扫描信号源** —— 跑 `scripts/scan_git_signals.sh` + `scripts/scan_chat_signals.py`，或者用 `git log` / `gh issue list` 手工等价做。
-2. **按 [类别 × tier] 归类** —— v2 强制显式 sweep 全 5 类（v1 evals 发现默认偏见是只考虑第 1 类）。
-3. **更新两层存储** —— 含 **强制 demotion check**：每个现有 Tier 1/2 item 都问一次 "毕业标记是不是已经悄悄达到了？"。**Incremental 纪律 (incremental discipline)**：如果文件自上次 retro 后被改过，优先用 append-only 而不是 in-place edit。
-4. **生成学习路径** —— 每个 Tier 1/2 item 写 2-3 条动作 + 毕业标记。
-5. **surface gap-shrinking 信号** —— 哪些毕业了 / 哪些卡住了 / 哪些是新的 / 速度 delta。**一段就够，不是 dissertation**。
+0. **Phase 0: AUDIT (防囤积强制门禁)** —— 检查文件系统上前序 `How to level up` 动作是否真正落地。若 `0 完成 且 ≥3 项挂起超过 14 天`，拒绝新增条目，要求先完成、显式砍掉或登记原因。
+1. **Phase 1: SWEEP (五维全量扫描)** —— 跑 `scripts/scan_git_signals.sh` + `scripts/scan_chat_signals.py`，强制显式扫描全部 5 大维度。
+2. **Phase 2: RANK (信号分级与毕业降级检查)** —— 按决策速度信号分配 Tier 1/2/3，并强制检查现有条目是否已达成毕业标记。
+3. **Phase 3: ANCHOR (代码库真实锚定)** —— 将每个核心 gap 锚定到用户代码库中真实存在的 `<file>:<line>`、`ADR-N` 或 `<commit-sha>`。
+4. **Phase 4: CALIBRATE (30秒快速校准微访谈)** —— 通过原生交互问答组件（如 `ask_question`）或对话快选，由用户确认：
+   - **聚焦主题 (Focused Themes)**：从复盘发现的候选主题中勾选本次重点；
+   - **学习目的 (Learning Purpose)**：`unblock`（解决眼前卡点）| `mental-model`（建立底层心智模型）| `guardrail`（防止同类返工/幻觉复发）| `articulate`（技术复盘分享/面试表达）；
+   - **学习与测验模式 (Delivery Mode)**：`in-agent-html`（推荐：Agent 内直接精讲 + 交互式 HTML 闯关测验）| `external-html`（外部 NotebookLM 研究包 + HTML 测验）| `chat-inline`（纯对话极简版）。
+5. **Phase 5: LAUNCH (双模精讲 + 交互式 HTML 闯关实验室)** —— 通过 `scripts/render_quiz_html.py` 编译生成零依赖、可离线运行的 `<repo>/.growth-log/quiz-<YYYY-MM-DD>.html`，内含：
+   - **Mode A：Agent 内直接四维精讲（默认）** —— 无需跳出 IDE 去 NotebookLM，直接结合 `<file>:<line>` 剖析实战影响、故障模式、地道范式与认知误区；
+   - **Mode B：外部 Deep Research / NotebookLM 一键复制包（可选）** —— 适合需要泛读 20 篇论文或在航班通勤时生成播客的场景；
+   - **交互式 4 题代码锚定测验** —— 含 **Predict-Then-Reveal（先预测后揭晓）锁定机制**、逐选项诊断解析（引用 `<file>:<line>`）、费曼自我复述沙盒及 **一键复制通关回执 (Mastery Receipt)**。
 
 两种 mode：
 - **Incremental** (milestone / session-end 默认)：只扫 delta，≤ 5 分钟。

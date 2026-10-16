@@ -158,15 +158,22 @@ Graduation markers must be **observable + bounded + reversible**: "3 consecutive
 
 ---
 
-## Workflow — what the skill actually does
+## Workflow — the 6-phase loop (v0.4.0)
 
-When invoked (via `/retrospective`, `/reflect`, `/growth-review`, or keyword triggers like "what are my biggest gaps", "review my growth", "我哪些 gap"):
+When invoked (via `/retrospective`, `/reflect`, `/growth-review`, `/growth-retrospective`, or keyword triggers):
 
-1. **Scan signal sources** — run `scripts/scan_git_signals.sh` + `scripts/scan_chat_signals.py`, or do equivalent manual extraction with `git log` / `gh issue list`.
-2. **Categorize by growth category × tier** — explicit sweep across all 5 categories (mandatory in v2 — the default bias is to over-index on category 1).
-3. **Update both storage layers** — including a mandatory **demotion check** on every existing Tier 1/2 item: does the graduation marker still hold? **Incremental discipline**: if files were updated since the last retro, prefer append-only over in-place edits.
-4. **Generate the learning journey** — 2-3 actions per Tier 1/2 item + graduation marker.
-5. **Surface the gap-shrinking signal** — items graduated, items stuck, new items, velocity delta. One paragraph; not a dissertation.
+0. **Phase 0: AUDIT (Forcing Function)** — checks the filesystem for prior `How to level up` artifacts. If `0 completed AND ≥3 pending >14 days`, refuses to add new items until you commit, deprioritize, or explicitly override.
+1. **Phase 1: SWEEP** — explicit pass across all 5 categories (`Domain knowledge`, `Human skills`, `Work habits`, `Meta-cognition`, `Productivity / focus`) via `scripts/scan_git_signals.sh` and `scripts/scan_chat_signals.py`.
+2. **Phase 2: RANK** — tiers each gap (`Tier 1` / `Tier 2` / `Tier 3`) by decision-velocity signals + mandatory demotion check on existing items.
+3. **Phase 3: ANCHOR** — grounds each top gap in a concrete `<file>:<line>`, `ADR-N`, or `<commit-sha>` in your repository.
+4. **Phase 4: CALIBRATE (Quick Survey)** — 30-second interactive intake (via `ask_question` modal or chat prompt) to select:
+   - **Focused Theme(s)** from the retro
+   - **Learning Purpose** (`unblock` immediate decision | `mental-model` | `guardrail` against regressions | `articulate` for sharing/ADR defense)
+   - **Delivery Mode** (`in-agent-html` default | `external-html` for NotebookLM | `chat-inline`)
+5. **Phase 5: LAUNCH (Dual-Mode Research + Interactive HTML Verification Lab)** — compiles `<repo>/.growth-log/quiz-<YYYY-MM-DD>.html` via `scripts/render_quiz_html.py`, embedding:
+   - **Mode A: In-Agent Deep-Dive Briefing (Default)** — 4-pillar explanation grounded in `<file>:<line>` with zero context-switching.
+   - **Mode B: External Deep Research / NotebookLM Prompt (Opt-in)** — one-click copyable prompt for literature surveys or commute podcasts.
+   - **Interactive 4-Question Anchored MCQ** — includes a **Predict-Then-Reveal commitment lock**, per-option diagnostic feedback citing `<file>:<line>`, Feynman Explain-Back sandbox, and a 1-click **Mastery Receipt**.
 
 Two modes:
 - **Incremental** (default for milestone / session-end triggers): scan only the delta. ≤ 5 minutes.

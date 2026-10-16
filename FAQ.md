@@ -34,6 +34,25 @@ For 95% of users, you use the first two and ignore the third. The skill defaults
 
 If you want a one-file version, the lean redesign proposal in [the CEO review notes](https://github.com/YoungApple/growth-retrospective-skill/issues) is exactly that. Open an issue if you want to drive that direction.
 
+## "Do I have to leave my IDE and copy-paste into NotebookLM / Deep Research?"
+
+No — we pressure-tested that assumption in v0.4.0 and changed the default.
+
+For 80%+ of engineering gaps (anything tied to your repo architecture, framework semantics, or coding habits), **your coding agent is a better teacher than an external tool** because it already holds your `<file>:<line>`, `git log`, and ADRs in context.
+
+- **Default (`in-agent-html`)**: The agent synthesizes a 4-pillar **In-Agent Deep-Dive Briefing** (*Why it matters at `<anchor>`*, *Production failure modes*, *Idiomatic stack pattern*, *Misconception vs reality*) right inside the session and embeds it into the Interactive HTML Lab. Zero context-switching.
+- **Opt-in (`external-html` / NotebookLM)**: The HTML Lab still includes a one-click **"Copy External Research Prompt"** tab for when you genuinely want a 20-paper literature survey or a NotebookLM Audio Overview podcast for a flight/commute.
+
+## "Why an Interactive HTML Verification Lab instead of plain Markdown MCQs?"
+
+Plain markdown `<details>` quizzes are passive — it's too easy to skim the answer key without committing to a mental prediction, and you don't get per-distractor diagnostic feedback.
+
+The self-contained HTML Lab (`<repo>/.growth-log/quiz-<YYYY-MM-DD>.html`, generated via `scripts/render_quiz_html.py`) adds:
+1. **Quick Calibration Bar**: Switch your learning purpose (`unblock` decision / `mental-model` / `guardrail` / `articulate`) and toggle between In-Agent Briefing and External Prompt.
+2. **Predict-Then-Reveal Gate**: Locks options on predict-form questions until you commit a hypothesis (maximizing prediction-error retention).
+3. **Per-Option Diagnostic Feedback**: Clicking an option immediately highlights green/red, explains why that specific choice is right or wrong, and cites `<file>:<line>` / `ADR-N`.
+4. **1-Click Mastery Receipt**: Copies your verified score + committed `≤4h` level-up action to paste back into the agent chat.
+
 ## "How is this different from /retro, /learn, or claude-mem?"
 
 Read the [README "What's different" table](README.md#whats-different-from-other-retro--learning-log-tools) for the side-by-side.
